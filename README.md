@@ -5,9 +5,14 @@ checking pipeline's status or triggering a promotion easy to do in jobs on Semap
 
 # Usage
 
-1) Include the script in your repository, e.g. save it in `.semaphore/semctl.py`
-2) Create secret that exposes API authorization token as API_TOKEN and attach it to desired jobs.
-3) You can run desired action with `python /.semaphore/semctl.py {action} {inputs}`
+1) Create secret that exposes API authorization token as API_TOKEN and attach it to desired jobs.
+2) Include the script in your repository, e.g. save it in `.semaphore/semctl.py`
+3) Add the following commands after `checkout` command in your jobs
+```
+chmod +x .semaphore/semctl.py
+sudo mv .semaphore/semctl.py /usr/local/bin/semctl
+```
+4) Add following command to run the desired action `semctl {action} {flags} {inputs}`
 
 # Specification
 
@@ -53,13 +58,13 @@ checking pipeline's status or triggering a promotion easy to do in jobs on Semap
 
 **Example usage**:
 
-  - `python semctl.py pipeline_status <pipeline_id>`
+  - `semctl pipeline_status <pipeline_id>` -
     Returns status of the pipeline with given id.
 
-  - `python semctl.py pipeline_status -f ".semaphore/deploy.yml"`
+  - `semctl pipeline_status -f ".semaphore/deploy.yml"` -
     Returns status of the latest pipeline created based on yaml configuration in `semaphore/deploy.yml` in the workflow with the id from the `SEMAPHORE_WORKFLOW_ID` environment variable.
 
-  - `python semctl.py pipeline_status -f ".semaphore/deploy.yml" -w <workflow_id>`
+  - `semctl pipeline_status -f ".semaphore/deploy.yml" -w <workflow_id>` -
     Returns status of the latest pipeline created based on yaml configuration in `semaphore/deploy.yml` in the workflow with the given id.
 
 ## `promotion_status` action
@@ -102,10 +107,10 @@ checking pipeline's status or triggering a promotion easy to do in jobs on Semap
 
 **Example usage**:
 
-  - `python semctl.py promotion_status "Production deployment"`
+  - `semctl promotion_status "Production deployment"` -
     Returns status of the pipeline that was started by triggering a `Production deployment` promotion of a parent pipeline with id from the `SEMAPHORE_PIPELINE_ID` environment variable.
 
-  - `python semctl.py promotion_status -p <pipeline_id> "Production deployment"`
+  - `semctl promotion_status -p <pipeline_id> "Production deployment"` -
     Returns status of the pipeline that was started by triggering a `Production deployment` promotion of a parent pipeline with a given pipeline_id.
 
 
@@ -147,14 +152,14 @@ checking pipeline's status or triggering a promotion easy to do in jobs on Semap
 
 **Example usage**:
 
-  - `python semctl.py promote "Production deployment"`
+  - `semctl promote "Production deployment"` -
     Triggers a `Production deployment` promotion of a pipeline with id from the `SEMAPHORE_PIPELINE_ID` environment variable.
     The promotion will be successfully triggered only if the parent pipeline has passed because the `override` flag is not given.
 
-  - `python semctl.py promote -o "Production deployment"`
+  - `semctl promote -o "Production deployment"` -
     Triggers a `Production deployment` promotion of a pipeline with id from the `SEMAPHORE_PIPELINE_ID` environment variable.
     The promotion will be triggered regardless of the status of the parent pipeline because the `override` flag is present.     
 
-  - `python semctl.py promote -p <pipeline_id> "Production deployment"`
+  - `semctl promote -p <pipeline_id> "Production deployment"` -
     Triggers a `Production deployment` promotion of a pipeline with the given id.
     The promotion will be successfully triggered only if the parent pipeline has passed because the `override` flag is not given.
