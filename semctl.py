@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-import os, sys, argparse, urllib, urllib2, json, time, traceback, logging, math
+import os, sys, argparse, urllib, urllib2, json, time, traceback, logging, math, itertools
 
 def read_required_env_vars():
     token = os.environ.get('API_TOKEN')
@@ -103,7 +103,9 @@ def promotion_status(args):
 
 def trigger_promotion(url, token, ppl_id, args):
     dict = {'pipeline_id' : ppl_id, 'name' : args.promotion_name, 'override' : args.override}
-    data = urllib.urlencode(dict)
+    parameters = set_parameters(args.parameters)
+    parameters.update(dict)
+    data = urllib.urlencode(parameters)
     req = urllib2.Request(url, data)
     req.add_header('Authorization', 'Token ' + token)
     try:
@@ -117,6 +119,20 @@ def trigger_promotion(url, token, ppl_id, args):
            sys.exit(1)
        else:
            raise
+
+def set_parameters(param_lists):
+    output = {}
+    params = list(itertools.chain.from_iterable(param_lists))
+    for param in params:
+        try:
+            key,value = param.split("=")
+        except ValueError as err:
+            error_msg = "Error: The -e flag excepts value in [param_name]=[param_value] format.\n"
+            error_msg += "       Use multiple -e flags to pas values for multiple parameters."
+            print(error_msg)
+            sys.exit(1)
+        output[key] = value
+    return output
 
 def sleep_until_started(list_url, token, promotion_name, trriger_time):
     promotion = False
@@ -212,6 +228,9 @@ def main(argv):
 
     help_o = "Sets override value to true which allows promotions even if parent pipeline is still running or has failed"
     parser_promote.add_argument('-o', dest='override', action='store_const', const='true', default='false', help=help_o)
+
+    help_e = "If promotion is parameterized, use multiples of \"-e param=value\" to pass values for parameters."
+    parser_promote.add_argument('-e', dest='parameters', action='append', nargs='+', default=[], metavar='param=value', help=help_e)
 
     parser_promote.set_defaults(func=promote)
 
