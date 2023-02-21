@@ -132,6 +132,7 @@ sudo mv .semaphore/semctl.py /usr/local/bin/semctl
  | -h                         | Show help                                                                                                                                                       |
  |  -p <pipeline_id>  |  Optional, pipeline_id of the parent pipeline. Default: value of SEMAPHORE_PIPELINE_ID env var           |
  |  -o                        |  Sets `override` value to `true` which allows promotions even if parent pipeline is still running or has failed |
+ |  -e                        |  Use it as `-e [param_1]=[value_1]` to pass `value_1` as a value for parameter `param_1` of a parameterized promotion. To pass multiple parameters use multiple `-e` flags. |
 
 **Required preexisting environment variables**:
 
@@ -162,4 +163,9 @@ sudo mv .semaphore/semctl.py /usr/local/bin/semctl
 
   - `semctl promote -p <pipeline_id> "Production deployment"` -
     Triggers a `Production deployment` promotion of a pipeline with the given id.
+    The promotion will be successfully triggered only if the parent pipeline has passed because the `override` flag is not given.     
+
+  - `semctl promote -e type=production -e region=eu-central-1  "Deployment"` -
+    Triggers a `Deployment` promotion of a pipeline with with id from the `SEMAPHORE_PIPELINE_ID` environment variable.
+    On trigger, parameter `type` will be set to `production` and parameter `region` will be set to  `eu-central-1`.
     The promotion will be successfully triggered only if the parent pipeline has passed because the `override` flag is not given.
